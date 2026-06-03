@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Night in CDMX</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141416;
+    --card: #1a1a1e;
+    --border: #2a2a30;
+    --accent: #e8b86d;
+    --accent2: #c96f3a;
+    --accent3: #7ec8a4;
+    --text: #e8e4dc;
+    --muted: #7a7870;
+    --warning: #e87d6d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(232,184,109,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(201,111,58,0.06) 0%, transparent 60%);
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 12px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    color: var(--text);
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.2s forwards;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+    max-width: 460px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.35s forwards;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 40px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.45s forwards;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meta-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .meta-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* Alert banner */
+  .alert {
+    margin: 40px 0 0;
+    background: rgba(232,125,109,0.08);
+    border: 1px solid rgba(232,125,109,0.25);
+    border-left: 3px solid var(--warning);
+    padding: 16px 20px;
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: #c9b5b0;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.5s forwards;
+  }
+
+  .alert strong {
+    color: var(--warning);
+    font-weight: 500;
+  }
+
+  .alert ul {
+    margin-top: 8px;
+    padding-left: 16px;
+  }
+
+  .alert li {
+    margin-bottom: 3px;
+  }
+
+  /* Timeline */
+  .timeline {
+    margin-top: 56px;
+    position: relative;
+  }
+
+  .timeline-line {
+    position: absolute;
+    left: 52px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--border) 5%, var(--border) 95%, transparent);
+  }
+
+  .stop {
+    display: grid;
+    grid-template-columns: 104px 1fr;
+    gap: 0 24px;
+    margin-bottom: 2px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .stop:nth-child(2) { animation-delay: 0.1s; }
+  .stop:nth-child(3) { animation-delay: 0.2s; }
+  .stop:nth-child(4) { animation-delay: 0.3s; }
+  .stop:nth-child(5) { animation-delay: 0.4s; }
+  .stop:nth-child(6) { animation-delay: 0.5s; }
+  .stop:nth-child(7) { animation-delay: 0.6s; }
+  .stop:nth-child(8) { animation-delay: 0.7s; }
+
+  .stop-time {
+    text-align: right;
+    padding-top: 22px;
+    padding-right: 24px;
+    position: relative;
+  }
+
+  .stop-time .time {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .stop-time .uber {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Dot on timeline */
+  .stop-time::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 28px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    transition: border-color 0.2s;
+  }
+
+  .stop:hover .stop-time::after {
+    border-color: var(--accent);
+  }
+
+  .stop-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stop-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--stop-color, var(--accent));
+    transform: scaleY(0);
+    transition: transform 0.25s ease;
+    transform-origin: top;
+  }
+
+  .stop:hover .stop-card {
+    border-color: #3a3a40;
+    transform: translateX(3px);
+  }
+
+  .stop:hover .stop-card::before {
+    transform: scaleY(1);
+  }
+
+  .stop-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+
+  .stop-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .stop-badge {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+
+  .badge-landmark { background: rgba(126,200,164,0.12); color: var(--accent3); border: 1px solid rgba(126,200,164,0.2); }
+  .badge-bar { background: rgba(232,184,109,0.1); color: var(--accent); border: 1px solid rgba(232,184,109,0.2); }
+  .badge-food { background: rgba(201,111,58,0.1); color: #d9896b; border: 1px solid rgba(201,111,58,0.2); }
+  .badge-park { background: rgba(126,200,164,0.08); color: #8dbfa0; border: 1px solid rgba(126,200,164,0.15); }
+  .badge-airport { background: rgba(122,120,112,0.15); color: var(--muted); border: 1px solid var(--border); }
+  .badge-world-class { background: rgba(232,184,109,0.15); color: var(--accent); border: 1px solid rgba(232,184,109,0.3); }
+
+  .stop-neighborhood {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .stop-desc {
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #b0aca4;
+  }
+
+  .stop-tip {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-left: 2px solid var(--stop-color, var(--accent));
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .stop-tip strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Final airport stop */
+  .stop.final .stop-card {
+    background: rgba(255,255,255,0.02);
+    border-style: dashed;
+  }
+
+  /* Tips section */
+  .tips-section {
+    margin-top: 56px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .tip-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #9a9590;
+  }
+
+  .tip-icon {
+    font-size: 18px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .tip-title {
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-size: 12.5px;
+  }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 580px) {
+    .hero { padding: 60px 24px 48px; }
+    .stop { grid-template-columns: 80px 1fr; }
+    .timeline-line { left: 40px; }
+    .tips-grid { grid-template-columns: 1fr; }
+    .hero-meta { flex-wrap: wrap; gap: 20px; }
+    footer { flex-direction: column; gap: 8px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div style="max-width:780px; margin:0 auto; padding:0 24px; position:relative;">
+    <div class="hero-tag">Overnight Layover Guide</div>
+    <h1>One Night<br>in <em>CDMX</em></h1>
+    <p class="hero-sub">You've got a window between landing and your 6am departure. Here's how to spend it in three of the city's best neighborhoods — no hotel, no wasted time.</p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <span class="meta-label">Start</span>
+        <span class="meta-value">~10:00 PM</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Return to Airport</span>
+        <span class="meta-value">~3:00 AM</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Neighborhoods</span>
+        <span class="meta-value">Centro · Roma · Condesa · Juárez</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Transport</span>
+        <span class="meta-value">Uber only</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="alert">
+    <strong>⚠ Safety basics before you go:</strong>
+    <ul>
+      <li>Always use <strong>Uber</strong> — never hail a street taxi</li>
+      <li>Stick to well-lit, busy streets and trust your gut</li>
+      <li>Keep your phone in a pocket, not in your hand on the street</li>
+      <li>The metro shuts down around midnight — you're on Uber after that</li>
+      <li>Cards accepted at most bars; carry some pesos for street food</li>
+    </ul>
+  </div>
+
+  <div class="timeline" style="margin-top: 56px;">
+    <div class="timeline-line"></div>
+
+    <!-- Stop 1 -->
+    <div class="stop" style="--stop-color: #7ec8a4;">
+      <div class="stop-time">
+        <div class="time">10:00 PM</div>
+        <div class="uber">↑ Uber from airport</div>
+      </div>
+      <div>
+        <div class="stop-card">
+          <div class="stop-neighborhood">Centro Histórico</div>
+          <div class="stop-header">
+            <div class="stop-name">El Zócalo</div>
+            <span class="stop-badge badge-landmark">Landmark</span>
+          </div>
+          <p class="stop-desc">One of the largest city squares in the world, and at night it's genuinely spectacular. The Metropolitan Cathedral and National Palace glow across the plaza. There are always people, performers, and vendors. Start here — it puts the whole city in context immediately.</p>
+          <div class="stop-tip"><strong>Duration:</strong> 30–45 min. Just walk around and absorb it — you don't need to go inside anything. Grab a street taco from a vendor while you're here.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stop 2 -->
+    <div class="stop" style="--stop-color: #e8b86d;">
+      <div class="stop-time">
+        <div class="time">10:45 PM</div>
+        <div class="uber">↑ 3 blocks walk</div>
+      </div>
+      <div>
+        <div class="stop-card">
+          <div class="stop-neighborhood">Centro Histórico</div>
+          <div class="stop-header">
+            <div class="stop-name">Calle Regina</div>
+            <span class="stop-badge badge-bar">Bar Street</span>
+          </div>
+          <p class="stop-desc">A pedestrian-only street a few blocks south of the Zócalo, lined with local bars, live music spilling out of doorways, and people hanging out on plastic chairs. This is where locals drink, not tourists — cheap mezcal, cold beer, zero pretension. Great way to ease into the night.</p>
+          <div class="stop-tip"><strong>Duration:</strong> ~45 min. Pick a bar with outdoor seating, have 1–2 drinks, and watch the street do its thing.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stop 3 -->
+    <div class="stop" style="--stop-color: #e8b86d;">
+      <div class="stop-time">
+        <div class="time">11:45 PM</div>
+        <div class="uber">↑ Uber to Roma Norte</div>
+      </div>
+      <div>
+        <div class="stop-card">
+          <div class="stop-neighborhood">Roma Norte</div>
+          <div class="stop-header">
+            <div class="stop-name">Licorerìa Limantour</div>
+            <span class="stop-badge badge-bar">Cocktail Bar</span>
+          </div>
+          <p class="stop-desc">Consistently ranked among the best cocktail bars in Latin America. On Álvaro Obregón in the heart of Roma Norte — a beautiful tree-lined boulevard that's lively at night. The drinks are creative and mezcal-forward. Cozy inside, tables spill onto the sidewalk. This is peak CDMX bar culture.</p>
+          <div class="stop-tip"><strong>Order:</strong> Mango y Chili, Banana Daiquiri, or ask what's seasonal. Open until 2am Thu–Sat. Arriving before midnight gives you a good window before last call.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stop 4 -->
+    <div class="stop" style="--stop-color: #7ec8a4;">
+      <div class="stop-time">
+        <div class="time">1:00 AM</div>
+        <div class="uber">↑ Walk south to Condesa</div>
+      </div>
+      <div>
+        <div class="stop-card">
+          <div class="stop-neighborhood">Condesa</div>
+          <div class="stop-header">
+            <div class="stop-name">Parque México</div>
+            <span class="stop-badge badge-park">Night Walk</span>
+          </div>
+          <p class="stop-desc">Walk south from Roma into Condesa and pass through this gorgeous Art Deco park — open 24 hours. Fountains, stone paths, huge old trees. The streets surrounding it are lined with bars still buzzing at this hour. Pick up a late-night taco from one of the street vendors posted up outside.</p>
+          <div class="stop-tip"><strong>Duration:</strong> 30–45 min stroll. Explore Ámsterdam Ave that circles around the park — some of the prettiest urban walking in the city.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stop 5 -->
+    <div class="stop" style="--stop-color: #e8b86d;">
+      <div class="stop-time">
+        <div class="time">1:45 AM</div>
+        <div class="uber">↑ Uber to Juárez</div>
+      </div>
+      <div>
+        <div class="stop-card">
+          <div class="stop-neighborhood">Juárez / Zona Rosa</div>
+          <div class="stop-header">
+            <div class="stop-name">Handshake Speakeasy</div>
+            <span class="stop-badge badge-world-class">Top 50 World</span>
+          </div>
+          <p class="stop-desc">End the night at one of the top cocktail bars on the planet — ranked in the World's 50 Best Bars list. Hidden entrance, dark and intimate interior, cocktails that are genuinely unlike anything you've had. The drinks are creative to the point of theatrical: tableside flames, unexpected ingredients, perfect balance. Worth every peso.</p>
+          <div class="stop-tip"><strong>Book ahead</strong> at handshake.bar — reservations fill 2 weeks out, open until 2am on weekends. This is tight with a 10pm arrival so book the last slot available. If fully booked, the Zona Rosa streets nearby have plenty of late-night alternatives that don't close until 3–4am.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final -->
+    <div class="stop final" style="--stop-color: #555;">
+      <div class="stop-time">
+        <div class="time">~3:00 AM</div>
+        <div class="uber">↑ Uber to airport</div>
+      </div>
+      <div>
+        <div class="stop-card">
+          <div class="stop-neighborhood">Aeropuerto Internacional</div>
+          <div class="stop-header">
+            <div class="stop-name">AICM — Terminal</div>
+            <span class="stop-badge badge-airport">Back to Reality</span>
+          </div>
+          <p class="stop-desc">Uber directly to the airport. From Juárez it's 25–35 minutes depending on traffic. Getting there by 3–3:30am gives you plenty of cushion before a 6am flight.</p>
+          <div class="stop-tip"><strong>Note:</strong> AICM has two terminals (T1 and T2) — confirm yours in advance. The Uber drop-off and check-in process can be slow at odd hours so don't cut it too close.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tips section -->
+  <div class="tips-section">
+    <div class="section-label">// Practical Notes</div>
+    <div class="tips-grid">
+      <div class="tip-card">
+        <span class="tip-icon">🚗</span>
+        <div class="tip-title">Always use Uber</div>
+        Same app, works great in CDMX. Much safer than hailing street taxis. Download before you land and make sure your payment method is set.
+      </div>
+      <div class="tip-card">
+        <span class="tip-icon">💸</span>
+        <div class="tip-title">Money</div>
+        Cards work at all the bars listed. Carry 200–400 pesos cash (~$10–20 USD) for street food, tacos, and vendors. ATMs are fine in Roma/Condesa.
+      </div>
+      <div class="tip-card">
+        <span class="tip-icon">🍹</span>
+        <div class="tip-title">What to drink</div>
+        You're in Mexico — order mezcal. Or a mezcal-based cocktail. Tequila is fine but mezcal is the move here. Modelo pairs with everything.
+      </div>
+      <div class="tip-card">
+        <span class="tip-icon">📍</span>
+        <div class="tip-title">Neighborhoods</div>
+        Roma Norte and Condesa are the safest and most walkable. Stay on main streets at night and you'll be totally fine. Trust your instincts.
+      </div>
+      <div class="tip-card">
+        <span class="tip-icon">🕐</span>
+        <div class="tip-title">CDMX runs late</div>
+        The city doesn't get going until 9–10pm. Don't be surprised if Limantour is quiet at 11 but packed by midnight. This works in your favor.
+      </div>
+      <div class="tip-card">
+        <span class="tip-icon">✈️</span>
+        <div class="tip-title">Airport buffer</div>
+        Leave wherever you are by 2:30–3am to be safe. AICM can move slowly at weird hours. Confirm T1 vs T2 before you go.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Mexico City · Overnight Layover Itinerary</span>
+    <span>8PM → 3AM → ✈️</span>
+  </footer>
+
+</div>
+
+</body>
+</html>
